@@ -30,3 +30,9 @@ Part of my slow with this project is I keep getting wrapped up trying to solve s
 
 1. Getting the client token via `Invoke-WebRequest`|`Invoke-RestMethod`. I'm currently using curl.exe but this means that the code is locked to Windows 10 or cases where someone has a usable curl.exe in the path. I think this is probably relatively easily solvable, I just got frustrated with it and decided to cheat for now.
 1. User Authentication. I don't know if this is solveable for a non-web set of tools. There are some examples of creating a web client and getting the auth but I haven't played with that yet; not sure if the redirect URL will get in the way. I have a small website where I played with the user auth in Python/Flask. AFAICT, the only thing I really need the user auth for is to get the list of toons. Currently I'm cheating by getting the JSON output of /wow/user/characters call (soon to be replaced with /profile/{account-id}/wow).
+
+---
+
+## Random bits
+
+I'm somewhat structuring this repo in a manner that I use with my day job but currently I'm not putting all of the infrastructure (mostly the parts that build the module into a nupkg) for now. Once this gets to the level that I think others may have interest, I'll add in those bits as I'll need them if I want to push the module into the PSGallery.
