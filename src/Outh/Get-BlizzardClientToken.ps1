@@ -30,11 +30,7 @@ function Get-BlizzardClientToken {
             return $Script:ClientTokenCache.access_token
         }
     }
-    $bnetClient = $env:BLIZ_CLIENT_ID
-    $bnetSecret = $env:BLIZ_API_SECRET
-    if (-not $bnetClient -or -not $bnetSecret) {
-        throw 'One or both of the environment vars BLIZ_CLIENT_ID and/or BLIZ_API_SECRET not set; cannot continue'
-    }
+    ($bnetClient, $bnetSecret) = Get-ClientCredential
 
     # TBD: Remove the dependency on curl.exe here; should be able to do this with Invoke-WebRequest
     $u = "${bnetClient}:${bnetSecret}"

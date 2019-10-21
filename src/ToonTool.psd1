@@ -25,6 +25,7 @@ IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-
     # FormatsToProcess = @()
     # NestedModules = @()
     FunctionsToExport    = @(
+        'Get-GameData'
         'ConvertFrom-UnixTimestamp'
         'Get-BlizzardClientToken'
         'Get-BlizzardData'
@@ -32,6 +33,8 @@ IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-
         # Export for ease of debugging; remove later
         'Get-BlizzardClientToken'
         'Get-GameDataUrl'
+        'Get-UserOauth'
+        '*'
     )
     CmdletsToExport      = @()
     VariablesToExport    = '*'
