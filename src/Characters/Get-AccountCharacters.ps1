@@ -8,10 +8,10 @@
 
 <#
 .SYNOPSIS
-    s...
+    Gets the list of characters (name,realm,region) associated with an account [READ NOTES]
 
 .DESCRIPTION
-    d...
+    Currently this is a non caching function, read the notes.
 
 .NOTES
     This is a placeholder-ish workaround. I haven't solved getting the OAuth for the account in PowerShell yet. For
@@ -40,7 +40,10 @@ function Get-AccountCharacters {
         $AccountId = 77710311,
 
         [ValidateSet('us', 'eu', 'kr', 'tw', 'cn')]
-        $Region = 'us'
+        $Region = 'us',
+
+        # Force getting from blizzard [NYI]
+        [switch] $Force
     )
 
     $cacheDir = Join-Path -Path $Module.DataRoot -ChildPath "profile-${Region}\${AccountId}\wow"
@@ -55,6 +58,6 @@ function Get-AccountCharacters {
     }
     $c = Get-Content -Path $cacheFile -Raw | ConvertFrom-Json
 
-    # Emit the list
-    $c.characters | Select-Object name,realm
+    # Emit the list'; include region in case someone is merging lists from multiple regions
+    $c.characters | Select-Object name,realm,@{Name='Region'; Expression = {$Region}}
 }

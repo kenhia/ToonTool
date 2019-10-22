@@ -123,6 +123,10 @@ $GameDataMap = @{
     # WoW Token API
     WoWTokenIndex                   = '/data/wow/token/index'
 
+    ########################### PROFILE
+
+    CharacterProfileStatus = '/profile/wow/character/{realmSlug}/{characterName}/status'
+
 }
 # I dislike nagging squigglies
 $null = $GameDataMap
