@@ -54,18 +54,28 @@ function Test-CharacterValid {
         foreach ($item in $InputObject) {
             $splat = @{
                 ApiName       = 'CharacterProfileStatus'
-                realmSlug     = $item.realm
-                characterName = $item.name
-                Region        = $item.region
+                realmSlug     = $item.realm.ToLower().Replace(' ','-')
+                characterName = $item.name.ToLower()
+                Region        = $item.region.ToLower()
                 Namespace     = "profile-$Region"
+                # Always need to get this new
+                Force         = $true
             }
             try {
                 $result = Get-GameData @splat
-                $item | Add-Member -NotePropertyName 'is_valid' -NotePropertyValue $true -PassThru
+                $isValid = ($null -ne $result.is_valid) -and $result.is_valid
             }
             catch {
-                $item | Add-Member -NotePropertyName 'is_valid' -NotePropertyValue $false -PassThru
+                $_
+                $isValid = $false
             }
+            if ('is_valid' -in ($item | Get-Member -MemberType NoteProperty).Name) {
+                $item.is_valid = $isValid
+            }
+            else {
+                $item | Add-Member -NotePropertyName 'is_valid' -NotePropertyValue $isValid
+            }
+            $item
         }
     }
 }

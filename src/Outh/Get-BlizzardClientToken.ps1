@@ -30,6 +30,7 @@ function Get-BlizzardClientToken {
             return $Script:ClientTokenCache.access_token
         }
     }
+    Write-Verbose 'Getting fresh token'
     ($bnetClient, $bnetSecret) = Get-ClientCredential
 
     # TBD: Remove the dependency on curl.exe here; should be able to do this with Invoke-WebRequest

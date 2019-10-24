@@ -77,19 +77,27 @@ function Get-GameData {
     end {
         $accessToken = Get-BlizzardClientToken
         $getUrlParams = $PSBoundParameters
-        if ($getUrlParams.ContainsKey('Force')) { $getUrlParams.Remove('Force')}
+        if ($getUrlParams.ContainsKey('Force')) { [void]$getUrlParams.Remove('Force')}
         ($url, $subdir) = Get-GameDataUrl @getUrlParams -AccessToken $accessToken -IncludeSubDir
 
         $cachePath = Get-GameDataCachePath -SubDir $subdir
         if (-not $Force -and (Test-Path -Path $cachePath -PathType Leaf)) {
             Get-Content -Path $cachePath -Raw | ConvertFrom-Json
-            Write-Host "source cache read: $cachePath" -ForegroundColor Magenta
+            Write-Verbose "source cache read: $cachePath"
         }
         else {
             # TODO: Add a get new token and retry here
-            $result = Invoke-WebRequest -Uri $url -Method Get
-            if ($result.StatusCode -ne 200) {
-                Write-Warning "Status Code != 200; Result is in $DbgGameDataResult"
+            Write-Verbose $url
+            try {
+                $result = Invoke-WebRequest -Uri $url -Method Get
+                $statusCode = $result.StatusCode
+            }
+            catch {
+                $StatusCode = $_.Exception.Response.StatusCode.value__
+            }
+
+            if ($StatusCode -ne 200) {
+                Write-Warning "Status Code: $StatusCode"
                 return $null
             }
             # Cache it
@@ -98,7 +106,7 @@ function Get-GameData {
                 mkdir $parent -ErrorAction Stop | Out-Null
             }
             Set-Content -Path $cachePath -Encoding utf8 -Value $result.Content
-            Write-Host "source NET cache written: $cachePath" -ForegroundColor Magenta
+            Write-Verbose "source NET cache written: $cachePath"
 
             # Emit it
             $result.Content | ConvertFrom-Json

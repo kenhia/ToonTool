@@ -155,7 +155,6 @@ function Get-GameDataUrl {
 
             # Emit the caching hint
             "${pathNamespaceBit}\${pathLocaleBit}${urlMapped}"
-
         }
     }
 }
