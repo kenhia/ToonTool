@@ -18,7 +18,30 @@ Starting to understand how the various pieces I'm trying to put together work. S
 
 ## Updates/News
 
-**19-Oct-2019** - I've been toying around on several different machines with several different directions and mostly not really getting serious about this. Probably not going to get too serious now, but I have some code that is starting to come together so I've made this (mostly empty) repo public and will start pulling the bits of code together and try to get some things working.
+### 26-Oct-2019
+
+By no means is this code ready, but it's starting to take a bit of shape. I started down one path for wrapping the APIs and then discovered (as I figured I would) some holes. The second round (in `Get-WowData*.ps1`) is, so far, looking better. I'm going to do a push to master with what I currently have so there is a bit of history of a path that led me to a better path. While the code is still has a ways to go to hit any MVP (yeah, I do Scrum, even for my personal projects), I'm now able to get a glimmer of what I should be able to do soon.
+
+A few days ago, there was an emissary quest that rewarded a weapon and I guessed which of my toons could benefit from it. They needed to be 120's with a decent iLvl but low weapon. I can't quite answer that easier with the current state of the code, but I can see it from here.
+
+```powershell
+$belaEquip = Get-WowData -Api CharacterEquipmentSummary -realmSlug trollbane -characterName belarsa
+$belaEquip.equipped_items[14..15].level
+# 415
+# 415
+$belaEquip.equipped_items.level.value | Measure-Object -Average -StandardDeviation -Maximum -Minimum
+# Count             : 16
+# Average           : 424.1875
+# Maximum           : 467
+# Minimum           : 415
+# StandardDeviation : 12.8541497838895
+```
+
+With other functions that know how to get all my toon names and realms, it will not be hard to write a function that will give me a list of weapon level (or any slot for that matter) and iLvl. I will probably write a standalone script to do this so I can really play with how I want to fit that into the module as a function. I'm currently thinking in a way where there would be too many parameters so I want to play with it a bit more.
+
+### 19-Oct-2019
+
+I've been toying around on several different machines with several different directions and mostly not really getting serious about this. Probably not going to get too serious now, but I have some code that is starting to come together so I've made this (mostly empty) repo public and will start pulling the bits of code together and try to get some things working.
 
 I'm focusing on the new API that Blizzard is in the process of moving to and mostly trying to do things natively in PowerShell.
 
