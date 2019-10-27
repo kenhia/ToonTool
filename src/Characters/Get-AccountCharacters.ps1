@@ -59,5 +59,5 @@ function Get-AccountCharacters {
     $c = Get-Content -Path $cacheFile -Raw | ConvertFrom-Json
 
     # Emit the list'; include region in case someone is merging lists from multiple regions
-    $c.characters | Select-Object name,realm,@{Name='Region'; Expression = {$Region}}
+    $c.characters # | Select-Object name,realm,@{Name='Region'; Expression = {$Region}}
 }

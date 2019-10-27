@@ -8,12 +8,12 @@
 
 $WowApiMap = @{
 
-    # -----  Character Equipment API -------------------------------------------------------------------------
+    # -----  Character Equipment  ----------------------------------------------------------------------------
     CharacterEquipmentSummary = @{
         url = '/profile/wow/character/{realmSlug}/{characterName}/equipment'
         namespace = 'profile-{Region}'
     }
-    # -----  Connected Realm API  ----------------------------------------------------------------------------
+    # -----  Connected Realm   -------------------------------------------------------------------------------
     ConnectedRealmsIndex = @{
         url       = '/data/wow/connected-realm/index'
         namespace = 'dynamic-{Region}'
@@ -22,7 +22,24 @@ $WowApiMap = @{
         url       = '/data/wow/connected-realm/{connectedRealmId}'
         namespace = 'dynamic-{Region}'
     }
-    # -----  Realm API  --------------------------------------------------------------------------------------
+    # ------ Playable Class ----------------------------------------------------------------------------------
+    PlayableClassesIndex = @{
+        url = '/data/wow/playable-class/index'
+        namespace = 'static-{Region}'
+    }
+    PlayableClass = @{
+        url = '/data/wow/playable-class/{classId}'
+        namespace = 'static-{Region}'
+    }
+    PlayableClassMedia = @{
+        url = '/data/wow/media/playable-class/{classId}' # {playableClassId}
+        namespace = 'static-{Region}'
+    }
+    PvpTalentSlots = @{
+        url = '/data/wow/playable-class/{classId}/pvp-talent-slots'
+        namespace = 'static-{Region}'
+    }
+    # -----  Realm   -----------------------------------------------------------------------------------------
     RealmsIndex          = @{
         url       = '/data/wow/realm/index'
         namespace = 'dynamic-{Region}'

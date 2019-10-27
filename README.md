@@ -20,6 +20,22 @@ Starting to understand how the various pieces I'm trying to put together work. S
 
 ### 26-Oct-2019
 
+> *Update to update:* I have a mini-MVP. It's not quite a viable product yet, but I can now do the thing that prompted me getting this project moving...I can run a script and seee what level weapons all my 120's are equipped with (and there's a switch to see all my toons, but other than 120's it's not that interesting for real use).
+
+```powershell
+.\scripts\EquippedWeapons.ps1 | Sort-Object -Property iLvl -Descending | ft -AutoSize
+```
+
+```text
+name      realm     spec          class          iLvl MainLvl OffHandLvl
+----      -----     ----          -----          ---- ------- ----------
+Belarsa   Trollbane Havoc         Demon Hunter 424.19     415        415
+Baleda    Trollbane Blood         Death Knight 410.73     410        ---
+Monkra    Trollbane Windwalker    Monk          408.4     415        ---
+[ . . .]
+Relarsa   Trollbane Subtlety      Rogue        278.44     289        284
+```
+
 By no means is this code ready, but it's starting to take a bit of shape. I started down one path for wrapping the APIs and then discovered (as I figured I would) some holes. The second round (in `Get-WowData*.ps1`) is, so far, looking better. I'm going to do a push to master with what I currently have so there is a bit of history of a path that led me to a better path. While the code is still has a ways to go to hit any MVP (yeah, I do Scrum, even for my personal projects), I'm now able to get a glimmer of what I should be able to do soon.
 
 A few days ago, there was an emissary quest that rewarded a weapon and I guessed which of my toons could benefit from it. They needed to be 120's with a decent iLvl but low weapon. I can't quite answer that easier with the current state of the code, but I can see it from here.
