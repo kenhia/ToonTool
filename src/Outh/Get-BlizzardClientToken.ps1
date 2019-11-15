@@ -21,30 +21,74 @@
 function Get-BlizzardClientToken {
     [CmdletBinding()]
     param (
-        [switch]$Force
+        [switch]$Force,
+        [switch]$Raw
     )
 
     if (-not $Force) {
         $now = Get-Date
         if ($Script:ClientTokenCache -and ($Script:ClientTokenCache.Expires -gt $now)) {
-            return $Script:ClientTokenCache.access_token
+            if ($Raw) {
+                $Script:ClientTokenCache
+            }
+            else {
+                $Script:ClientTokenCache.access_token
+            }
+            return
         }
     }
     Write-Verbose 'Getting fresh token'
     ($bnetClient, $bnetSecret) = Get-ClientCredential
 
-    # TBD: Remove the dependency on curl.exe here; should be able to do this with Invoke-WebRequest
+    $credPlain = '{0}:{1}' -f $bnetClient, $bnetSecret
+    $utf8Encoding = [System.Text.UTF8Encoding]::new()
+    $credBytes = $utf8Encoding.GetBytes($credPlain)
+    $base64Auth = [Convert]::ToBase64String(($credBytes))
+
+    $splat = @{
+        Method          = 'POST'
+        Uri             = 'https://us.battle.net/oauth/token'
+        ContentType     = 'application/x-www-form-urlencoded'
+        Body            = 'grant_type=client_credentials'
+        Headers         = @{Authorization = ('Basic {0}' -f $base64auth) }
+        UseBasicParsing = $true
+    }
+    
+    try {
+        $result = Invoke-WebRequest @splat
+        if ($result.StatusCode -eq 200) {
+            $tokenInfo = $result.Content | ConvertFrom-Json
+        }
+    }
+    catch {
+        $statusCode = $_.Exception.Response.StatusCode.value__
+        $status = $_.Exception.Response.StatusCode
+        $errorMessage = "Could not retrieve token. Status code ($statusCode) $status"
+    }
+
+    <# ----- More or less the same thing using curl.exe ---------------------
     $u = "${bnetClient}:${bnetSecret}"
     $result = curl.exe -u $u -d grant_type=client_credentials https://us.battle.net/oauth/token 2> $null
     try { $tokenInfo = $result | ConvertFrom-Json } catch {}
     if (-not $tokenInfo.access_token) {
         throw "Could not get access token. Result: $result"
     }
-    $expires = (Get-Date).AddSeconds($tokenInfo.expires_in)
-    $tokenInfo | Add-Member -NotePropertyName 'Expires' -NotePropertyValue $expires
+    ---------------------------------------------------------------------- #>
+    if ($tokenInfo) {
+        $expires = (Get-Date).AddSeconds($tokenInfo.expires_in)
+        $tokenInfo | Add-Member -NotePropertyName 'Expires' -NotePropertyValue $expires
+    
+        $Script:ClientTokenCache = $tokenInfo
 
-    $Script:ClientTokenCache = $tokenInfo
-
-    return $Script:ClientTokenCache.access_token
+        if ($Raw) {
+            $Script:ClientTokenCache
+        }
+        else {
+            $Script:ClientTokenCache.access_token
+        }
+    }
+    else {
+        throw $errorMessage
+    }
 }
 

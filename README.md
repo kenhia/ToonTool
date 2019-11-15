@@ -18,6 +18,12 @@ Starting to understand how the various pieces I'm trying to put together work. S
 
 ## Updates/News
 
+### 15-Nov-2019
+
+Haven't done a lot with this over the last couple weeks. Between work, gaming, exploring other things, and a medical issue, just haven't had a lot of time to devout. Hoping to do some work with this over the weekend...I especially want to get the OAuth2 stuff working so I can directly download my toon list.
+
+I *have* removed the need for curl.exe to get the client credential. Both using curl.exe and Invoke-WebRequest take around 200ms; curl.exe was slightly faster (20-30ms) but not enough to justify a dependency on an external tool that may not be there. Worth noting that this is only on getting the token initially; until it expires and we have to get a new one, subsequent calls use a (per-session) cached copy that returns in about 5ms.
+
 ### 26-Oct-2019
 
 > *Update to update:* I have a mini-MVP. It's not quite a viable product yet, but I can now do the thing that prompted me getting this project moving...I can run a script and seee what level weapons all my 120's are equipped with (and there's a switch to see all my toons, but other than 120's it's not that interesting for real use).
