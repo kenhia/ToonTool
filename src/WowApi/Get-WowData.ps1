@@ -25,8 +25,8 @@ function Get-WowData {
         [ValidateSet('us', 'eu', 'kr', 'tw', 'cn')]
         $Region = 'us',
 
-        [ValidateSet(('en_US', 'es_MX', 'pt_BR', 'de_DE', 'es_ES', 'fr_FR', 'it_IT', 'pt_PT', 
-                'ru_RU', 'ko_KR', 'zh_TW', 'zh_CN', 'ALL'))]
+        [ValidateSet('en_US', 'es_MX', 'pt_BR', 'de_DE', 'es_ES', 'fr_FR', 'it_IT', 'pt_PT', 
+                'ru_RU', 'ko_KR', 'zh_TW', 'zh_CN', 'ALL')]
         $Locale = 'en_US',
 
         $CacheExtension = '.json',
@@ -50,6 +50,7 @@ function Get-WowData {
 
         $cachePath = Get-GameDataCachePath -Subdir $subdir -Extension $CacheExtension
         if (-not $Force) {
+            # Write-Host "<- $cachePath" -ForegroundColor DarkMagenta
             $resultContent = Get-CachedGameData -Path $cachePath
         }
         if (-not $resultContent) {
@@ -74,6 +75,7 @@ function Get-WowData {
             if (-not (Test-Path -Path $parent -PathType Container)) {
                 mkdir $parent -ErrorAction Stop | Out-Null
             }
+            # Write-Host "-> $cachePath" -ForegroundColor DarkMagenta
             Set-Content -Path $cachePath -Encoding utf8 -value $resultContent
         }
 

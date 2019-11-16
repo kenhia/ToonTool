@@ -13,6 +13,19 @@ $WowApiMap = @{
         url = '/profile/wow/character/{realmSlug}/{characterName}/equipment'
         namespace = 'profile-{Region}'
     }
+    CharacterMediaSummary = @{
+        url = '/profile/wow/character/{realmSlug}/{characterName}/character-media'
+        namespace = 'profile-{Region}'
+    }
+    # ----- Character Profile --------------------------------------------------------------------------------
+    CharacterProfileSummary = @{
+        url = '/profile/wow/character/{realmSlug}/{characterName}'
+        namespace = 'profile-{Region}'
+    }
+    CharacterProfileStatus = @{
+        url = '/profile/wow/character/{realmSlug}/{characterName}/status'
+        namespace = 'profile-{Region}'
+    }
     # -----  Connected Realm   -------------------------------------------------------------------------------
     ConnectedRealmsIndex = @{
         url       = '/data/wow/connected-realm/index'

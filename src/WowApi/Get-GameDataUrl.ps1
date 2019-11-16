@@ -78,8 +78,8 @@ function Get-GameDataUrl {
         $Namespace = 'AUTO',
 
         # Use ALL to omit the locale and get all localized key values
-        [ValidateSet(('en_US', 'es_MX', 'pt_BR', 'de_DE', 'es_ES', 'fr_FR', 'it_IT', 'pt_PT', 
-                'ru_RU', 'ko_KR', 'zh_TW', 'zh_CN', 'ALL'))]
+        [ValidateSet('en_US', 'es_MX', 'pt_BR', 'de_DE', 'es_ES', 'fr_FR', 'it_IT', 'pt_PT', 
+                'ru_RU', 'ko_KR', 'zh_TW', 'zh_CN', 'ALL')]
         $Locale = 'en_US',
 
         # Access token is needed, but I can see cases where you'd want to tack it on later/update/etc.
