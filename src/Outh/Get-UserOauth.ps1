@@ -44,8 +44,12 @@ function Get-UserOauth {
             code         = $authCode
         }
         Write-Verbose "token-request: $([pscustomobject]$tokenrequest)"
-        $token = Invoke-RestMethod -Method Post -Uri 'https://us.battle.net/oauth/token' -Headers $basic -Body $tokenrequest -ContentType 'application/json'
+        $basic = @{ "Authorization" = ("Basic", [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(($bnetClient, $bnetSecret -join ":"))) -join " ") }
+        $token = Invoke-RestMethod -Method Post -Uri 'https://us.battle.net/oauth/token' -Headers $basic -Body $tokenrequest
         Write-Verbose "token-response: $($token)"
+    }
+    if ($token) {
+        return $token
     }
 }
 
