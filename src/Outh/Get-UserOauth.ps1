@@ -23,8 +23,9 @@ function Get-UserOauth {
 
     ($bnetClient, $bnetSecret) = Get-ClientCredential
 
-    # App Secret -change so this is generated and then checked on return
-    $state = 'sIbGUXY1d$JI2756FeOBBXUfd&x7vCgefC5hx65Q7kpl'
+    # Generate a random state to check
+    $state = Get-StateSecret
+
     # TODO: FIX REGION BIT and CN different URL
     $url = 'https://us.battle.net/oauth/authorize'
     $url += "?client_id=$bnetClient"
@@ -35,6 +36,12 @@ function Get-UserOauth {
     Show-OAuthWindow
     $regex = '(?<=code=)(.*)(?=&)'
     $authCode = ($uri | Select-String -Pattern $regex).Matches[0].Value
+
+    if ($uri -notmatch 'state=([^&]*)' -or $Matches[1] -ne $state) {
+        # State doesn't match
+        throw 'Get-UserOauth - state secret did not match in return.'
+    }
+    # $Global:dbgAuthUri = $uri
     Write-Verbose "got an auth code: $authCode"
     if ($authCode.Length -gt 20) {
         # send token request
@@ -51,6 +58,22 @@ function Get-UserOauth {
     if ($token) {
         return $token
     }
+}
+
+function Get-StateSecret {
+    <#
+    .SYNOPSIS
+        Gets a random string to use for state
+    .NOTES
+        Yes, I was amusing myself when naming this function
+    #>
+
+    $c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'
+    $sb = [System.Text.StringBuilder]::new(44)
+    for ($i = 0; $i -lt 40; $i++) {
+        [void]$sb.Append($c[(Get-Random -Maximum $c.Length)])
+    }
+    $sb.ToString()
 }
 
 function Show-OAuthWindow {
@@ -76,52 +99,3 @@ function Show-OAuthWindow {
     $form.Add_Shown( { $form.Activate() })
     $form.ShowDialog() | Out-Null
 }
-
-
-
-<#
-function Get-UserOauth {
-    [CmdletBinding()]
-    param ()
-
-    $VerbosePreference = 'Continue'
-
-    ($bnetClient, $bnetSecret) = Get-ClientCredential
-
-    # K: should this be redirect_uri for WoW?
-    $Global:clientreq = ConvertFrom-Json '{"redirect_uris":["https://localhost"]}'
-    $Global:clientreq = ConvertFrom-Json '{"redirect_uri":"https://localhost"}'
-    $clientres = ConvertFromJson @"
-{
-    "client_id": $bnetClient,
-    "client_secret": $bnetSecret
-}
-"@
-
-    Add-Type -AssemblyName System.Windows.Forms
-    Add-Type -AssemblyName System.Web
-
-    $form = [Windows.Forms.Form]::new()
-    $form.Width = 640
-    $form.Height = 480
-    $web = [Windows.Forms.WebBrowser]::new()
-    $web.Size = $form.ClientSize
-    $web.Anchor = "Left,Top,Right,Bottom"
-    $form.Controls.Add($web)
-    # Global for collecting authorization code response
-    $Global:redirect_uri = $null
-    # add handler for the embedded browser's Navigating event
-    $web.add_Navigating({
-        Write-Verbose "Navigating $($_.Url)"
-        $uri = [uri] $Global:clientreq.redirect_uri
-        if ($_.Url.Authority -eq $uri.Authority) {
-            # Collect authorization response in a global
-            $Global:redirect_uri = $_.Url
-            # Cancel event and close browser window
-            $form.DialogResult = "OK"
-            $form.Close()
-            $_.Cancel = $true
-        }
-    })
-}
-#>
