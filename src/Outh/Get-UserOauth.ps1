@@ -17,28 +17,40 @@
 function Get-UserOauth {
     [CmdletBinding()]
     param()
-    throw "Not working yet"
+    # throw "Not working yet"
 
     $VerbosePreference = 'Continue'
 
     ($bnetClient, $bnetSecret) = Get-ClientCredential
 
-    # App Secret - move into a envVar or something
-    $state = 'sIbGUXY1d$JI56FeOBBXUfd&x7vCgefC5hx65Q7kpl'
+    # App Secret -change so this is generated and then checked on return
+    $state = 'sIbGUXY1d$JI2756FeOBBXUfd&x7vCgefC5hx65Q7kpl'
     # TODO: FIX REGION BIT and CN different URL
     $url = 'https://us.battle.net/oauth/authorize'
     $url += "?client_id=$bnetClient"
-    $url += "&redirect_uri=https://localhost"
+    $url += "&redirect_uri=http://localhost"
     $url += "&scope=wow.profile"
     $url += "&state=$state"
+    $url += "&response_type=code"
     Show-OAuthWindow
     $regex = '(?<=code=)(.*)(?=&)'
     $authCode = ($uri | Select-String -Pattern $regex).Matches[0].Value
     Write-Verbose "got an auth code: $authCode"
+    if ($authCode.Length -gt 20) {
+        # send token request
+        $tokenrequest = @{
+            grant_type   = "authorization_code"
+            redirect_uri = "http://localhost"
+            code         = $authCode
+        }
+        Write-Verbose "token-request: $([pscustomobject]$tokenrequest)"
+        $token = Invoke-RestMethod -Method Post -Uri 'https://us.battle.net/oauth/token' -Headers $basic -Body $tokenrequest -ContentType 'application/json'
+        Write-Verbose "token-response: $($token)"
+    }
 }
 
 function Show-OAuthWindow {
-    $VerbosePreference = 'Continue'
+    #$VerbosePreference = 'Continue'
     Add-Type -AssemblyName System.Windows.Forms
     $form = [System.Windows.Forms.Form]::new()
     $form.Width = 440
@@ -49,6 +61,7 @@ function Show-OAuthWindow {
     $web.Url = $url #"https://www.bing.com"
     $DocCompleted = {
         Write-Verbose "In Doc Completed"
+        Write-Verbose "url [$url]"
         Write-Verbose "URI: $($web.Url.AbsoluteUri)"
         $Global:uri = $web.Url.AbsoluteUri
         if ($Global:uri -match "error=[^&]*|code=[^&]*") { $form.Close() }
@@ -56,7 +69,7 @@ function Show-OAuthWindow {
     $web.ScriptErrorsSuppressed = $true
     $web.Add_DocumentCompleted($DocCompleted)
     $form.Controls.Add($web)
-    $form.Add_Shown({$form.Activate()})
+    $form.Add_Shown( { $form.Activate() })
     $form.ShowDialog() | Out-Null
 }
 
