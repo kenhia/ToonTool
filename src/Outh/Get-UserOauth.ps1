@@ -16,32 +16,40 @@
 
 function Get-UserOauth {
     [CmdletBinding()]
-    param()
-    # throw "Not working yet"
-
-    $VerbosePreference = 'Continue'
+    param(
+        [ValidateSet('us', 'eu', 'kr', 'tw', 'cn')]
+        $Region = 'us'
+    )
 
     ($bnetClient, $bnetSecret) = Get-ClientCredential
 
     # Generate a random state to check
     $state = Get-StateSecret
 
-    # TODO: FIX REGION BIT and CN different URL
-    $url = 'https://us.battle.net/oauth/authorize'
-    $url += "?client_id=$bnetClient"
-    $url += "&redirect_uri=http://localhost"
-    $url += "&scope=wow.profile"
-    $url += "&state=$state"
-    $url += "&response_type=code"
+    # TODO: Does 'cn' require special handling?
+    $url = Join-UrlData -Url "https://${Region}.battle.net/oauth/authorize" -Params @(
+        "client_id=$bnetClient"
+        "redirect_uri=http://localhost"
+        "scope=wow.profile"
+        "state=$state"
+        "response_type=code"
+    )
+    $null = $url # Shut up PSAnalyzer
+
+    # "returns" value to $Global:OAUTHuri, need to use it and then clean up the global
     Show-OAuthWindow
     $regex = '(?<=code=)(.*)(?=&)'
-    $authCode = ($uri | Select-String -Pattern $regex).Matches[0].Value
+    $authCode = ($OAUTHuri | Select-String -Pattern $regex).Matches[0].Value
 
-    if ($uri -notmatch 'state=([^&]*)' -or $Matches[1] -ne $state) {
+    if ($OAUTHuri -notmatch 'state=([^&]*)' -or $Matches[1] -ne $state) {
         # State doesn't match
         throw 'Get-UserOauth - state secret did not match in return.'
     }
-    # $Global:dbgAuthUri = $uri
+
+    # Done with OAUTHuri
+    $Global:OAUTHuri = $null
+    Remove-Variable -Scope Global -Name OAUTHuri
+
     Write-Verbose "got an auth code: $authCode"
     if ($authCode.Length -gt 20) {
         # send token request
@@ -58,6 +66,24 @@ function Get-UserOauth {
     if ($token) {
         return $token
     }
+}
+
+function Join-UrlData {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [string] $Url,
+        [string[]] $Params
+    )
+    $sb = [System.Text.StringBuilder]::new()
+    [void]$sb.Append($Url)
+    if ($Params.Count -gt 0) {
+        [void]$sb.AppendFormat("?{0}", $Params[0])
+        for ($i = 1; $i -lt $Params.Count; $i++) {
+            [void]$sb.AppendFormat("&{0}", $Params[$i])
+        }
+    }
+    $sb.ToString()
 }
 
 function Get-StateSecret {
@@ -80,18 +106,18 @@ function Show-OAuthWindow {
     #$VerbosePreference = 'Continue'
     Add-Type -AssemblyName System.Windows.Forms
     $form = [System.Windows.Forms.Form]::new()
-    $form.Width = 440
+    $form.Width = 500
     $form.Height = 640
     $web = [System.Windows.Forms.WebBrowser]::new()
     $web.Size = $form.ClientSize
     $web.Anchor = "Left,Top,Right,Bottom"
-    $web.Url = $url #"https://www.bing.com"
+    $web.Url = $url
     $DocCompleted = {
         Write-Verbose "In Doc Completed"
         Write-Verbose "url [$url]"
         Write-Verbose "URI: $($web.Url.AbsoluteUri)"
-        $Global:uri = $web.Url.AbsoluteUri
-        if ($Global:uri -match "error=[^&]*|code=[^&]*") { $form.Close() }
+        $Global:OAUTHuri = $web.Url.AbsoluteUri
+        if ($Global:OAUTHuri -match "error=[^&]*|code=[^&]*") { $form.Close() }
     }
     $web.ScriptErrorsSuppressed = $true
     $web.Add_DocumentCompleted($DocCompleted)
