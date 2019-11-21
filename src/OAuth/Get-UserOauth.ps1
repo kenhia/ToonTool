@@ -1,10 +1,10 @@
-# -------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------
 # Copyright (c) Ken Hiatt. All rights reserved.
 # Licensed under the MIT License.
 #
 # THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
 # IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-# -------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------
 
 <#
 .SYNOPSIS
@@ -12,6 +12,7 @@
 
 .NOTES
     No idea how to do this with PowerShell other than on Windows.
+    This does not work on PS Core :-(
 #>
 
 function Get-UserOauth {
@@ -27,28 +28,41 @@ function Get-UserOauth {
     $state = Get-StateSecret
 
     # TODO: Does 'cn' require special handling?
-    $url = Join-UrlData -Url "https://${Region}.battle.net/oauth/authorize" -Params @(
+    if ($Region -eq 'cn') {
+        $urlbase = 'https://www.battlenet.com.cn'
+    }
+    else {
+        $urlbase = "https://${Region}.battle.net"
+    }
+    $url = Join-UrlData -Url "$urlbase/oauth/authorize" -Params @(
         "client_id=$bnetClient"
         "redirect_uri=http://localhost"
         "scope=wow.profile"
         "state=$state"
         "response_type=code"
     )
-    $null = $url # Shut up PSAnalyzer
+    $null = $url # Shut up PSAnalyzer; variable is used by Show-OAuthWindow
 
     # "returns" value to $Global:OAUTHuri, need to use it and then clean up the global
     Show-OAuthWindow
-    $regex = '(?<=code=)(.*)(?=&)'
-    $authCode = ($OAUTHuri | Select-String -Pattern $regex).Matches[0].Value
 
+    if ($OAUTHuri -match 'code=([^&]*)') {
+        $authCode = $Matches[1]
+    }
+    else {
+        # Did not get a code
+        throw 'Get-UserOauth - did not get a code'
+    }
     if ($OAUTHuri -notmatch 'state=([^&]*)' -or $Matches[1] -ne $state) {
         # State doesn't match
         throw 'Get-UserOauth - state secret did not match in return.'
     }
 
     # Done with OAUTHuri
-    $Global:OAUTHuri = $null
-    Remove-Variable -Scope Global -Name OAUTHuri
+    if (-not $env:TOONTOOL_DEBUG) {
+        $Global:OAUTHuri = $null
+        Remove-Variable -Scope Global -Name OAUTHuri
+    }
 
     Write-Verbose "got an auth code: $authCode"
     if ($authCode.Length -gt 20) {
@@ -58,49 +72,14 @@ function Get-UserOauth {
             redirect_uri = "http://localhost"
             code         = $authCode
         }
-        Write-Verbose "token-request: $([pscustomobject]$tokenrequest)"
         $basic = @{ "Authorization" = ("Basic", [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(($bnetClient, $bnetSecret -join ":"))) -join " ") }
         $token = Invoke-RestMethod -Method Post -Uri 'https://us.battle.net/oauth/token' -Headers $basic -Body $tokenrequest
-        Write-Verbose "token-response: $($token)"
     }
     if ($token) {
         return $token
     }
 }
 
-function Join-UrlData {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)]
-        [string] $Url,
-        [string[]] $Params
-    )
-    $sb = [System.Text.StringBuilder]::new()
-    [void]$sb.Append($Url)
-    if ($Params.Count -gt 0) {
-        [void]$sb.AppendFormat("?{0}", $Params[0])
-        for ($i = 1; $i -lt $Params.Count; $i++) {
-            [void]$sb.AppendFormat("&{0}", $Params[$i])
-        }
-    }
-    $sb.ToString()
-}
-
-function Get-StateSecret {
-    <#
-    .SYNOPSIS
-        Gets a random string to use for state
-    .NOTES
-        Yes, I was amusing myself when naming this function
-    #>
-
-    $c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'
-    $sb = [System.Text.StringBuilder]::new(44)
-    for ($i = 0; $i -lt 40; $i++) {
-        [void]$sb.Append($c[(Get-Random -Maximum $c.Length)])
-    }
-    $sb.ToString()
-}
 
 function Show-OAuthWindow {
     #$VerbosePreference = 'Continue'
@@ -113,9 +92,6 @@ function Show-OAuthWindow {
     $web.Anchor = "Left,Top,Right,Bottom"
     $web.Url = $url
     $DocCompleted = {
-        Write-Verbose "In Doc Completed"
-        Write-Verbose "url [$url]"
-        Write-Verbose "URI: $($web.Url.AbsoluteUri)"
         $Global:OAUTHuri = $web.Url.AbsoluteUri
         if ($Global:OAUTHuri -match "error=[^&]*|code=[^&]*") { $form.Close() }
     }

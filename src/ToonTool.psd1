@@ -1,7 +1,7 @@
 @{
     RootModule           = 'ToonTool.psm1'
     ModuleVersion        = '0.0.2'
-    CompatiblePSEditions = @('Desktop', 'Core')
+    CompatiblePSEditions = @('Desktop')
     GUID                 = 'c9750163-1c4e-4b82-976b-92b97986e93d'
     Author               = 'Ken Hiatt'
     CompanyName          = 'Ken Hiatt'
