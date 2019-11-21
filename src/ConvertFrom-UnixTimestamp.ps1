@@ -19,6 +19,13 @@ function ConvertFrom-UnixTimestamp {
         [Parameter(Mandatory)]
         [string]$Timestamp
     )
+
+    # hack?
+    if ($Timestamp.Length -lt 13) {
+        $Timestamp += '000'
+    }
+
+    $utcKind = [System.DateTimeKind]::Utc
     $unixEpoch = [datetime]::new(1970, 1, 1, 0, 0, 0, $utcKind)
 
     $seconds = 0
@@ -27,8 +34,6 @@ function ConvertFrom-UnixTimestamp {
         return
     }
     [void] [Int32]::TryParse(($Timestamp.Substring($Timestamp.Length - 3)), [ref]$milliseconds)
-
-    $utcKind = [System.DateTimeKind]::Utc
 
     $lastPlayed = $unixEpoch + [timespan]::new(0, 0, 0, $seconds, $milliseconds)
     $lastPlayed.ToLocalTime()

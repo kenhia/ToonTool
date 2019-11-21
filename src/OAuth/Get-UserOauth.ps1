@@ -27,7 +27,7 @@ function Get-UserOauth {
     # Generate a random state to check
     $state = Get-StateSecret
 
-    # TODO: Does 'cn' require special handling?
+    # 'cn' requires special handling
     if ($Region -eq 'cn') {
         $urlbase = 'https://www.battlenet.com.cn'
     }
