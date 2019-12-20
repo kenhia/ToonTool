@@ -46,18 +46,51 @@ function Get-AccountCharacters {
         [switch] $Force
     )
 
+    $AccountId = $user.id
+
+    # Wondering if there's an "approved" way to figure out when the last time you exited the game was
+    $sentinalFile = 'C:\Program Files (x86)\World of Warcraft\_retail_\WTF\config.wtf'
+    $leftAzeroth = Get-Item -Path $sentinalFile -ErrorAction SilentlyContinue | Select-Object -ExpandProperty LastWriteTime
+
     $cacheDir = Join-Path -Path $Module.DataRoot -ChildPath "profile-${Region}\${AccountId}\wow"
-    if (-not (Test-Path -Path $cacheDir -PathType Container)) {
-        Write-Warning "Directory not found: $cacheDir"
-        return
+    if (-not $cacheDir) {
+        mkdir $cacheDir | Out-Null
+        if (-not (Test-Path -Path $cacheDir -PathType Container)) {
+            Write-Warning "Could not create cache directory for account information: $cacheDir"
+            return
+        }
     }
     $cacheFile = Join-Path -Path $cacheDir -ChildPath characters.json
-    if (-not (Test-Path -Path $cacheFile -PathType Leaf)) {
-        Write-Warning "File not found: $cacheFile"
-        return
-    }
-    $c = Get-Content -Path $cacheFile -Raw | ConvertFrom-Json
 
-    # Emit the list'; include region in case someone is merging lists from multiple regions
-    $c.characters # | Select-Object name,realm,@{Name='Region'; Expression = {$Region}}
+    if (Test-Path -Path $cacheFile -PathType Leaf){
+        $c = Get-Content -Path $cacheFile -Raw | ConvertFrom-Json
+    }
+
+    ## Caching all around
+    ## Call with User
+    ## Probably move all into Get-UserCharacters
+    ## ...i.e. one stop initialization for an account
+
+    if ((Get-Item -Path $cacheFile -ErrorAction SilentlyContinue).LastWriteTime -lt $leftAzeroth) {
+        try {
+            $c = Get-UserCharacters -Token
+        }
+        catch {
+            Write-Warning "Could not get character data for account $AccountId from Blizzard"
+            Write-Warning $_.Exception.Message
+        }
+    }
+
+
+    foreach ($toon in $c.characters) {
+        if ($toon.lastModified) {
+            $utcTime = ConvertFrom-UnixTimestamp -Timestamp $toon.lastModified
+            if ($utcTime) {
+                $toon | Add-Member -NotePropertyName lastPlayedUTC -NotePropertyValue $utcTime
+                $toon | Add-Member -NotePropertyName lastPlayed -NotePropertyValue $utcTime.ToLocalTime()
+            }
+            $toon | Add-Member -NotePropertyName 'Region' -NotePropertyValue $Region
+        }
+        $toon
+    }
 }

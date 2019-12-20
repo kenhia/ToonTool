@@ -9,9 +9,7 @@
 <#
 .SYNOPSIS
     Maps a realm name (or id) to the realmSlug
-
 #>
-
 function Get-RealmSlug {
     [CmdletBinding(DefaultParameterSetName = 'name')]
     param (

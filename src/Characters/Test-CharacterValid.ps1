@@ -53,16 +53,15 @@ function Test-CharacterValid {
     process {
         foreach ($item in $InputObject) {
             $splat = @{
-                ApiName       = 'CharacterProfileStatus'
-                realmSlug     = $item.realm.ToLower().Replace(' ','-')
+                Api           = 'CharacterProfileStatus'
+                realmSlug     = Get-RealmSlug -Name $item.realm
                 characterName = $item.name.ToLower()
                 Region        = $item.region.ToLower()
-                Namespace     = "profile-$Region"
                 # Always need to get this new
                 Force         = $true
             }
             try {
-                $result = Get-GameData @splat
+                $result = Get-WowData @splat
                 $isValid = ($null -ne $result.is_valid) -and $result.is_valid
             }
             catch {

@@ -56,7 +56,7 @@ function Get-WowData {
         if (-not $resultContent) {
             # We are getting it from Blizzard
             try {
-                $result = Invoke-WebRequest -Uri $url -Method Get
+                $result = Invoke-WebRequest -Uri $url -Method Get -UseBasicParsing
                 $statusCode = $result.StatusCode
             }
             catch {
@@ -75,7 +75,7 @@ function Get-WowData {
             if (-not (Test-Path -Path $parent -PathType Container)) {
                 mkdir $parent -ErrorAction Stop | Out-Null
             }
-            # Write-Host "-> $cachePath" -ForegroundColor DarkMagenta
+            Write-Host "-> $cachePath" -ForegroundColor DarkMagenta
             Set-Content -Path $cachePath -Encoding utf8 -value $resultContent
         }
 

@@ -1,0 +1,111 @@
+{
+    "_links": {
+      "self": {
+        "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa?namespace=profile-us"
+      }
+    },
+    "id": 194632169,
+    "name": "Belarsa",
+    "gender": {
+      "type": "FEMALE",
+      "name": "Female"
+    },
+    "faction": {
+      "type": "HORDE",
+      "name": "Horde"
+    },
+    "race": {
+      "key": {
+        "href": "https://us.api.blizzard.com/data/wow/playable-race/10?namespace=static-8.2.5_31884-us"
+      },
+      "name": "Blood Elf",
+      "id": 10
+    },
+    "character_class": {
+      "key": {
+        "href": "https://us.api.blizzard.com/data/wow/playable-class/12?namespace=static-8.2.5_31884-us"
+      },
+      "name": "Demon Hunter",
+      "id": 12
+    },
+    "active_spec": {
+      "key": {
+        "href": "https://us.api.blizzard.com/data/wow/playable-specialization/577?namespace=static-8.2.5_31884-us"
+      },
+      "name": "Havoc",
+      "id": 577
+    },
+    "realm": {
+      "key": {
+        "href": "https://us.api.blizzard.com/data/wow/realm/1175?namespace=dynamic-us"
+      },
+      "name": "Trollbane",
+      "id": 1175,
+      "slug": "trollbane"
+    },
+    "guild": {
+      "key": {
+        "href": "https://us.api.blizzard.com/data/wow/guild/trollbane/hordes-hellions?namespace=profile-us"
+      },
+      "name": "Hordes Hellions",
+      "id": 80166546,
+      "realm": {
+        "key": {
+          "href": "https://us.api.blizzard.com/data/wow/realm/1175?namespace=dynamic-us"
+        },
+        "name": "Trollbane",
+        "id": 1175,
+        "slug": "trollbane"
+      }
+    },
+    "level": 120,
+    "experience": 0,
+    "achievement_points": 4725,
+    "achievements": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/achievements?namespace=profile-us"
+    },
+    "titles": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/titles?namespace=profile-us"
+    },
+    "pvp_summary": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/pvp-summary?namespace=profile-us"
+    },
+    "raid_progression": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/raid-progression?namespace=profile-us"
+    },
+    "media": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/character-media?namespace=profile-us"
+    },
+    "last_login_timestamp": 1572216470000,
+    "average_item_level": 424,
+    "equipped_item_level": 424,
+    "specializations": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/specializations?namespace=profile-us"
+    },
+    "statistics": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/statistics?namespace=profile-us"
+    },
+    "mythic_keystone_profile": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/mythic-keystone-profile?namespace=profile-us"
+    },
+    "equipment": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/equipment?namespace=profile-us"
+    },
+    "appearance": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/appearance?namespace=profile-us"
+    },
+    "collections": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/collections?namespace=profile-us"
+    },
+    "active_title": {
+      "key": {
+        "href": "https://us.api.blizzard.com/data/wow/title/361?namespace=static-8.2.5_31884-us"
+      },
+      "name": "Timelord",
+      "id": 361,
+      "display_string": "Timelord {name}"
+    },
+    "reputations": {
+      "href": "https://us.api.blizzard.com/profile/wow/character/trollbane/belarsa/reputations?namespace=profile-us"
+    }
+  }

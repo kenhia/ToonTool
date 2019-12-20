@@ -12,7 +12,7 @@
 
 .NOTES
     No idea how to do this with PowerShell other than on Windows.
-    This does not work on PS Core :-(
+    This does not work on PS Core prior to version 7 (which is pre-release right now)
 #>
 
 function Get-UserOauth {
@@ -80,7 +80,20 @@ function Get-UserOauth {
     }
 }
 
+<# Does not work...404
+function Revoke-UserAuthToken {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        $Token
+    )
+    ($bnetClient, $bnetSecret) = Get-ClientCredential
 
+    $basic = @{ "Authorization" = ("Basic", [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(($bnetClient, $bnetSecret -join ":"))) -join " ") }
+    $url = 'https://us.battle.net/oauth/revoke?token=' + $Token
+    Invoke-RestMethod -Method Post -Uri $url -Headers $basic
+}
+#>
 function Show-OAuthWindow {
     #$VerbosePreference = 'Continue'
     Add-Type -AssemblyName System.Windows.Forms
@@ -91,6 +104,9 @@ function Show-OAuthWindow {
     $web.Size = $form.ClientSize
     $web.Anchor = "Left,Top,Right,Bottom"
     $web.Url = $url
+    # From: https://stackoverflow.com/questions/21265674/delete-cookies-in-webbrowser-without-restart/21512662#21512662
+    # But doesn't do the trick.
+    # $web.Document.ExecCommand("ClearAuthenticationCache", $false, $null)
     $DocCompleted = {
         $Global:OAUTHuri = $web.Url.AbsoluteUri
         if ($Global:OAUTHuri -match "error=[^&]*|code=[^&]*") { $form.Close() }

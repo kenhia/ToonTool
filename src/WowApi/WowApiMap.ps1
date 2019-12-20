@@ -52,6 +52,15 @@ $WowApiMap = @{
         url = '/data/wow/playable-class/{classId}/pvp-talent-slots'
         namespace = 'static-{Region}'
     }
+    # -----  Playable Race -----------------------------------------------------------------------------------
+    PlayableRacesIndex = @{
+        url = '/data/wow/playable-race/index'
+        namespace = 'static-{Region}'
+    }
+    PlayableRace = @{
+        url = '/data/wow/playable-race/{playableRaceId}'
+        namespace = 'static-{Region}'
+    }
     # -----  Realm   -----------------------------------------------------------------------------------------
     RealmsIndex          = @{
         url       = '/data/wow/realm/index'

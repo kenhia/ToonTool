@@ -25,6 +25,7 @@ IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-
     # FormatsToProcess = @()
     # NestedModules = @()
     FunctionsToExport    = @(
+        'Get-WowUser'
         'Get-GameData'
         'ConvertFrom-UnixTimestamp'
         'Get-BlizzardClientToken'
