@@ -12,9 +12,6 @@ foreach ($f in $ps1Files) {
     . $f.FullName
 }
 
-$Script:Module = @{
-    DataRoot = $null
-}
 
 $dataRootTmp = Join-Path -Path $PSScriptRoot -ChildPath ..\.data
 if (-not (Test-Path -Path $dataRootTmp)) {
@@ -29,6 +26,10 @@ if (-not (Test-Path -Path $dataRootTmp)) {
     }
     Write-Host "DataRoot is set to: $($Module.DataRoot)" -ForegroundColor Cyan
 }
-$Module.DataRoot = Resolve-Path -Path $dataRootTmp
+#$Module.DataRoot = Resolve-Path -Path $dataRootTmp
+
+Initialize-ModuleVar
+New-ModuleVar -Name DataRoot -Description 'Root folder for file cache' -Value $dataRootTmp
+New-ModuleVar -Name Cache -Description 'Module in-memory cache.' -Value @{}
 
 Remove-Variable -Name dataRootTmp

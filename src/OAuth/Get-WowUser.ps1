@@ -30,15 +30,14 @@ function Get-WowUser {
         [switch]$Force
     )
 
+    $cachedWowUser = Get-CachedVariable -Name WowUser
+    if (-not $Force -and $cachedWowUser) {
+        return $cachedWowUser
+    }
+
     $now = Get-Date
 
-    if ($Force) {
-        $Script:CurrentUser = $null
-    }
-    if ($CurrentUser -and $CurrentUser.tokenExpires -gt ($now).AddMinutes(10)) {
-        return $CurrentUser
-    }
-
+    Write-Host 'Going to the web...' -ForegroundColor Magenta
     $userOauth = Get-UserOauth
     if (-not $userOauth.access_token) {
         Write-Warning 'Did not get an access token.'
@@ -47,7 +46,7 @@ function Get-WowUser {
 
     $userInfo = Get-UserInfo $userOauth.access_token
 
-    $Script:CurrentUser = [PSCustomObject]@{
+    $wowuser = [PSCustomObject]@{
         token        = $userOauth.access_token
         tokenExpires = $now.AddSeconds($userOauth.expires_in)
         tokenType    = $userOauth.token_type
@@ -56,5 +55,6 @@ function Get-WowUser {
         subscription = $userInfo.sub
         id           = $userInfo.id
     }
-    $CurrentUser
+
+    Set-CachedVariable -Name WowUser -Value $wowuser -Expires $wowuser.tokenExpires -PassThru
 }

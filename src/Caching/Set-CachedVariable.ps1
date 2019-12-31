@@ -8,7 +8,7 @@
 
 <#
 .SYNOPSIS
-    s...
+    Sets a variable into the in-memory cache for later retrieval
 
 .DESCRIPTION
     d...
@@ -31,7 +31,14 @@ function Set-CachedVariable {
         $Timeout = 60,
 
         [Parameter(Mandatory,ParameterSetName='expires')]
-        [DateTime]$Expires
+        [DateTime]$Expires,
+
+        # Set the cached variable to stay valid for the entire session. Note that a session could be longed lived.
+        # Note: this switch will override a timeout passed as a parameter.
+        [switch]$NoExpire,
+
+        # Emit the value
+        [switch]$PassThru
     )
 
     if ($PSCmdlet.ParameterSetName -eq 'timeout') {
@@ -42,34 +49,17 @@ function Set-CachedVariable {
             $Expires = (Get-Date).AddMinutes($Timeout)
         }
     }
+    if ($NoExpire) {
+        $Expires = [DateTime]::MaxValue
+    }
 
-    $Module._Cache[$Name] = [PSCustomObject]@{
+    $Script:Module.Cache[$Name] = [PSCustomObject]@{
         PSTypeName = 'ModuleCachedVariable'
         Value = $Value
         Expires = $Expires
     }
-}
 
-function Get-CachedVar {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)]
-        $Name
-    )
-
-    if ($Module._Cache.ContainsKey($Name)) {
-        $now = Get-Date
-        if ($now -lt $Module._Cache.Expires) {
-            $Module._Cache[$Name].Value
-        }
-        else {
-            $Module._Cache.Remove($Name)
-        }
-    }
-}
-
-function Initialize-ModuleVar {
-    $Script:Module = @{
-        _Cache = @{}
+    if ($PassThru) {
+        $Value
     }
 }

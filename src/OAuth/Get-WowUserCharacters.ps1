@@ -6,16 +6,19 @@
 # IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 # ----------------------------------------------------------------------------------------------------------------
 
-function Get-UserCharacters {
+function Get-WowUserCharacters {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory)]
-        $Token,
-
         [ValidateSet('us', 'eu', 'kr', 'tw', 'cn')]
         $Region = 'us'
     )
 
+    # Get-WowUser does caching so okay to call it frequently
+    $wowuser = Get-WowUser
+    $token = $wowuser.Token
+    if (-not $token) {
+        throw 'Could not get token for user.'
+    }
     if ($Region -eq 'cn') {
         $urlbase = 'https://gateway.battlenet.com.cn'
     }
@@ -24,11 +27,31 @@ function Get-UserCharacters {
     }
     $url = "$urlbase/wow/user/characters"
 
-    $authorization = @{ Authorization = "Bearer $Token" }
-    Invoke-RestMethod -Method Get -Uri $url -Headers $authorization
+    $authorization = @{ Authorization = "Bearer $token" }
+    $tmp = Invoke-RestMethod -Method Get -Uri $url -Headers $authorization
+    $characters = $tmp.characters
+    if (-not $characters) {
+        throw "Could not get toon list."
+    }
+    foreach ($c in $characters) {
+        $gender = $c.gender
+        # Get the race; if not cached, it will be after first call to specific index
+        $raceInfo = Get-WowData -Api PlayableRace -playableRaceId $c.race
+        $raceName = Get-GenderName -Object $raceInfo -Gender $gender -Id $c.race
+        $c | Add-Member -NotePropertyName raceName -NotePropertyValue $raceName
+        $c | Add-Member -NotePropertyName raceExtended -NotePropertyValue $raceInfo
+
+        # Get the class; ditto
+        $classInfo = Get-WowData -Api PlayableClass -classId $c.class
+        $className = Get-GenderName -Object $classInfo -Gender $gender -id $c.class
+        $c | Add-Member -NotePropertyName className -NotePropertyValue $className
+        $c | Add-Member -NotePropertyName classExtended -NotePropertyValue $classInfo
+    }
+
+    $characters
 }
 
-function Get-UserCharactersNew {
+function Get-WowUserCharactersNew {
     # THIS DOES NOT APPEAR TO BE WORKING YET...no idea if I'm doing it right
     [CmdletBinding()]
     param(
